@@ -4,9 +4,8 @@ url: https://developers.deutschebahn.com/db-api-marketplace/apis/
 
 Аналитический проект для работы с **Deutsche Bahn Timetables API**: загрузка расписаний, отслеживание изменений и анализ задержек поездов.
 
----
-
 ## Структура проекта
+```markdown
 .
 ├── data/ # Данные
 │ ├── raw/ # Сырые XML-выгрузки из API
@@ -29,25 +28,30 @@ url: https://developers.deutschebahn.com/db-api-marketplace/apis/
 ├── pyproject.toml # Метаданные проекта
 ├── LICENSE
 └── README.md # Этот файл
-
----
+```
 
 ## Установка и подготовка
 
 1. Клонировать репозиторий и перейти в него:
-    ```bash
-   	git clone https://github.com/<yourname>/train-delays-analysis.git
+   ```bash
+	git clone https://github.com/<yourname>/train-delays-analysis.git
    	cd train-delays-analysis
+    ```
 
 2. Создать виртуальное окружение (пример через venv):
-	python3 -m venv db_venv
-	source db_venv/bin/activate
+   ```bash
+   python3 -m venv db_venv
+   source db_venv/bin/activate
+   ```
 
 3. Установить зависимости:
-	pip install -r requirements.txt
-
+   ```bash
+   pip install -r requirements.txt
+   ```
+   
 4. Создать файл .env в корне проекта:
-	# DB API Marketplace credentials (https://apis.deutschebahn.com/db-api-marketplace/)
+	```markdown
+ 	# DB API Marketplace credentials (https://apis.deutschebahn.com/db-api-marketplace/)
 	DB_CLIENT_ID=...
 	DB_API_KEY=...
 
@@ -56,42 +60,56 @@ url: https://developers.deutschebahn.com/db-api-marketplace/apis/
 	DEFAULT_EVA =8000152
 	DEFAULT_DATE=20250916      # YYYY-MM-DD
 	DEFAULT_HOUR=8             # 0-23
-
----
+ 	```
 
 ## Получение данных
 
-### Запуск основной загрузки:
+1. Запуск основной загрузки:
+   ```bash
 	python -m train_delays.fetch
-	- Файлы сохраняются в:
-		data/raw/YYYYMMDD_HHMM/
-		  ├─ stations_<NAME>.json
-		  ├─ timetable_plan_<EVA>_<STAMP>.xml
-		  └─ timetable_changes_<EVA>_<STAMP>.xml
+   ```
 
-## Парсинг данных
-	### План:
+	Файлы сохраняются в:
+	```markdown
+	data/raw/YYYYMMDD_HHMM/
+	  ├─ stations_<NAME>.json
+	  ├─ timetable_plan_<EVA>_<STAMP>.xml
+	  └─ timetable_changes_<EVA>_<STAMP>.xml
+    ```
+
+
+2. Парсинг данных
+	- План:
+		```bash
 		python -m scripts.parse_plan
 		# → data/processed/plan_parsed.csv
+  		```
 
-	### Изменения:
+   - Изменения:
+     	```bash
 		python -m scripts.parse_changes
 		# → data/processed/changes_parsed.csv
+        ```
 
-	### В работе! -> Мердж и расчёт задержек:
+   - В работе! -> Мердж и расчёт задержек:
+    	```bash
 		python -m scripts.merge_plan_changes --tolerance-min 3
 		# → data/processed/merged_with_delays.csv
+    	```
+      
 ## Анализ
-	Смотри ноутбук:
-	notebooks/01_delays_eda.ipynb
-	В нём первые графики: распределение задержек, топ-станции по проблемам, частота по категориям.
+Открыть ноутбук:
+```markdown
+notebooks/01_delays_eda.ipynb
+```
+В нём первые графики: распределение задержек, топ-станции по проблемам, частота по категориям.
 
 
 ## План спринтов
 
 Sprint 1: Подключение к DB API, выгрузка «живых» окон (done)
 
-Sprint 2: Парсинг, merge, подсчёт задержек, базовый EDA
+Sprint 2: Парсинг, merge, подсчёт задержек, базовый EDA (in process)
 
 Sprint 3: Построение словаря кодов причин, дашборды (Plotly, Streamlit)
 
