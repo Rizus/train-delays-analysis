@@ -215,3 +215,4 @@ data/**/*.parquet
 data/**/*.feather
 
 train_delays.egg-info/
+scripts/test.py

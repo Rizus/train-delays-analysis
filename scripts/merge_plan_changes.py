@@ -27,6 +27,9 @@ def _read_plan() -> pd.DataFrame:
         keep_default_na=True,
         na_values=["", "NA", "NaN", "null"],
     )
+
+    df["planned_ts"] = pd.to_datetime(df["planned_ts"], errors="coerce", utc=True).dt.tz_convert("Europe/Berlin")
+
     # Явно приводим некоторые текстовые поля к StringDtype (чтобы не было object)
     for col in ["station","eva","stop_id","event","platform_planned","platform_current",
                 "line","path_pp","train_run_id","wings","tl_class","tl_type",
@@ -40,26 +43,30 @@ def _read_plan() -> pd.DataFrame:
 def _read_changes() -> pd.DataFrame:
     if not CHG_CSV.exists():
         raise FileNotFoundError(f"Нет файла {CHG_CSV}. Сначала запусти scripts/parse_changes.py")
+
+    # читаем всё как строки, а потом вручную конвертируем даты
     df = pd.read_csv(
         CHG_CSV,
-        parse_dates=["ts", "from_ts", "to_ts", "event_ct"],
         dtype="string",
         keep_default_na=True,
         na_values=["", "NA", "NaN", "null"],
     )
-    # Приведём типы
+
+    # Конвертируем колонки с временем вручную
+    for col in ["ts", "from_ts", "to_ts", "event_ct"]:
+        if col in df.columns:
+            df[col] = pd.to_datetime(df[col], errors="coerce", utc=True).dt.tz_convert("Europe/Berlin")
+
+    # Приведём все текстовые поля к StringDtype
     for col in ["station","eva","stop_id","scope","event","platform","line","path",
                 "msg_id","msg_type","msg_code","category","priority","ts_tts"]:
         if col in df.columns:
             df[col] = df[col].astype("string")
 
-    # Определим «эффективное фактическое время» изменения:
-    # сперва event_ct (факт у ar/dp), иначе ts (время сообщения)
+    # Определим фактическое время изменения
     df["change_time"] = df["event_ct"].where(df["event_ct"].notna(), df["ts"])
-    # Важно: parse_dates делает datetime64[ns, tz] — ок. Если вдруг остались строки, парсим:
-    if df["change_time"].dtype == "string":
-        df["change_time"] = pd.to_datetime(df["change_time"], utc=False, errors="coerce")
-    # для merge_asof нужна сортировка по ключу
+
+    # Обязательно сортировка по времени
     return df.sort_values("change_time").reset_index(drop=True)
 
 

@@ -1,5 +1,4 @@
 from __future__ import annotations
-
 import os, time, json, pathlib
 from typing import Any, Dict, List, Optional, Union
 from zoneinfo import ZoneInfo
@@ -12,7 +11,7 @@ import xml.etree.ElementTree as ET
 
 
 # --- Константы/настройки ---
-BERLIN = ZoneInfo("Europe/Berlin")                          # локальная TZ (для меток времени и дефолтов)
+BERLIN = ZoneInfo("Europe/Berlin") # локальная TZ (для меток времени и дефолтов)
 BASE = "https://apis.deutschebahn.com/db-api-marketplace/apis"
 USER_AGENT = "train-delays-analysis/0.1 (+github.com/yourname)"
 HTTP_TIMEOUT_S = 30
@@ -169,7 +168,7 @@ def fetch_and_save_raw(
     if not eva:
         raise ValueError("EVA number not found in station payload.")
 
-    # Локальные «сейчас» (для метки папки и дефолтов даты/часа)
+    # Локальное «сейчас» (для метки папки и дефолтов даты/часа)
     now_local = datetime.now(BERLIN)
 
     # Приводим входную дату к YYMMDD (или берём текущую)
